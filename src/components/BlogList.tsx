@@ -1,57 +1,64 @@
 import { useQuery } from "@tanstack/react-query";
-import { getBlogs } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
+import { getBlogs } from "../lib/api";
 
 export default function BlogList({ onSelect, selectedId }: { onSelect: (id: number) => void; selectedId: number | null }) {
-  const { data: blogs, isLoading, error } = useQuery({
-    queryKey: ["blogs"],
-    queryFn: getBlogs,
+  const { data: blogs, isLoading } = useQuery({ 
+    queryKey: ['blogs'], 
+    queryFn: getBlogs 
   });
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-32 w-full rounded-xl" />
-        ))}
-      </div>
-    );
-  }
-
-  if (error) return <div className="text-red-500">Error loading blogs.</div>;
+  if (isLoading) return (
+    <div className="space-y-4 p-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-32 bg-slate-100 animate-pulse rounded-2xl" />
+      ))}
+    </div>
+  );
 
   return (
-    <ScrollArea className="h-[calc(100vh-160px)] pr-4">
-      <div className="space-y-4">
-        {blogs?.map((blog: any) => (
-          <Card
-            key={blog.id}
-            onClick={() => onSelect(blog.id)}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              selectedId === blog.id ? "border-blue-600 bg-blue-50/50" : "border-slate-200"
-            }`}
-          >
-            <CardHeader className="p-4 pb-2">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
-                  {blog.category[0]}
+    <div className="flex flex-col gap-4 overflow-y-auto px-1 pb-10">
+      {blogs?.map((blog: any) => (
+        <div 
+          key={blog.id}
+          onClick={() => onSelect(blog.id)}
+          className={`p-5 mb-4 rounded-2xl border transition-all cursor-pointer ${
+          String(selectedId) === String(blog.id) 
+          ? 'border-blue-600 bg-white ring-1 ring-blue-600' 
+          : 'border-slate-100 bg-white'
+        }`}
+        >
+          {/* Active Indicator Bar */}
+          {selectedId === Number(blog.id) && (
+            <div className="absolute left-0 top-6 bottom-6 w-1 bg-blue-600 rounded-r-full" />
+          )}
+
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                {blog.category?.[0] || 'General'}
+              </span>
+              {blog.id === "1" && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-purple-600 bg-purple-50 px-2 py-1 rounded">
+                  Featured
                 </span>
-                <span className="text-[10px] text-slate-400">
-                  {new Date(blog.date).toLocaleDateString()}
-                </span>
-              </div>
-              <CardTitle className="text-md font-bold leading-tight line-clamp-2">
-                {blog.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <p className="text-xs text-slate-500 line-clamp-2">{blog.description}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </ScrollArea>
+              )}
+            </div>
+            <span className="text-[10px] font-medium text-slate-400">
+              {new Date(blog.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            </span>
+          </div>
+
+          <h3 className={`font-bold text-slate-900 leading-tight mb-2 transition-colors ${
+            selectedId === Number(blog.id) ? 'text-blue-700' : 'group-hover:text-blue-600'
+          }`}>
+            {blog.title}
+          </h3>
+          
+          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">
+            {blog.description}
+          </p>
+        </div>
+      ))}
+    </div>
   );
 }

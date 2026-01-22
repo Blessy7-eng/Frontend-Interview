@@ -12,9 +12,11 @@ export const getBlogs = async () => {
 };
 
 // Task 2: Fetch a single blog by ID
-export const getBlogById = async (id: number) => {
-  const { data } = await api.get(`/blogs/${id}`);
-  return data;
+export const getBlogById = async (id: string) => {
+  const blogs = await getBlogs(); 
+  const blog = blogs.find((b: any) => String(b.id) === String(id));
+  if (!blog) throw new Error("Blog not found");
+  return blog;
 };
 
 // Task 3: Create a new blog
